@@ -68,6 +68,22 @@ class GridEngine:
         with open(TRADES_FILE, "w") as f:
             json.dump(self._trades, f, indent=2)
 
+    def _save_state(self):
+        with open(STATE_FILE, "w") as f:
+            json.dump({"running": self.running, "settings": self.settings}, f, indent=2)
+
+    def load_state(self):
+        """Called on startup — resume if was previously running."""
+        if os.path.exists(STATE_FILE):
+            try:
+                with open(STATE_FILE) as f:
+                    state = json.load(f)
+                if state.get("running"):
+                    print("  ♻️  Auto-resuming grid from saved state")
+                    self.start(state.get("settings"))
+            except Exception as e:
+                print(f"  ⚠ Could not restore state: {e}")
+
     # ── Grid math ─────────────────────────────────────────────────────────────
 
     def _build_levels(self):
@@ -103,12 +119,14 @@ class GridEngine:
         self._status   = "Starting..."
         self._orders   = {}
         self._grid_levels = self._build_levels()
+        self._save_state()
         self._thread   = threading.Thread(target=self._run_loop, daemon=True, name="grid-engine")
         self._thread.start()
 
     def stop(self):
         self.running = False
         self._status = "Stopped"
+        self._save_state()
         if not self.settings["paper_trading"]:
             self._cancel_all_orders()
 

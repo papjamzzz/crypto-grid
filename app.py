@@ -12,6 +12,7 @@ from grid_engine import engine
 import coinbase_api as cb
 
 app = Flask(__name__)
+engine.load_state()   # auto-resume if bot was running before restart
 
 # ── Pages ─────────────────────────────────────────────────────────────────────
 
