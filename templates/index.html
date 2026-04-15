@@ -536,9 +536,9 @@
       <div class="fader-strip">
         <div class="fader-head">
           <span class="fader-name">Lower Bound</span>
-          <span class="fader-val amber" id="fv-lower">$74,000</span>
+          <span class="fader-val amber" id="fv-lower">$83,000</span>
         </div>
-        <input type="range" class="c-amber" id="s-lower" min="50000" max="100000" step="100" value="74000"
+        <input type="range" class="c-amber" id="s-lower" min="50000" max="100000" step="100" value="83000"
                oninput="syncFader('lower',this.value)">
         <div class="fader-range"><span>$50k</span><span>$100k</span></div>
         <div class="fader-desc">Bottom of the grid range</div>
@@ -548,9 +548,9 @@
       <div class="fader-strip">
         <div class="fader-head">
           <span class="fader-name">Upper Bound</span>
-          <span class="fader-val amber" id="fv-upper">$76,000</span>
+          <span class="fader-val amber" id="fv-upper">$85,000</span>
         </div>
-        <input type="range" class="c-amber" id="s-upper" min="50000" max="110000" step="100" value="76000"
+        <input type="range" class="c-amber" id="s-upper" min="50000" max="110000" step="100" value="85000"
                oninput="syncFader('upper',this.value)">
         <div class="fader-range"><span>$50k</span><span>$110k</span></div>
         <div class="fader-desc">Top of the grid range</div>
@@ -560,11 +560,11 @@
       <div class="fader-strip">
         <div class="fader-head">
           <span class="fader-name">Grid Lines</span>
-          <span class="fader-val blue" id="fv-grids">40</span>
+          <span class="fader-val blue" id="fv-grids">10</span>
         </div>
-        <input type="range" class="c-blue" id="s-grids" min="4" max="80" step="1" value="40"
+        <input type="range" class="c-blue" id="s-grids" min="4" max="80" step="1" value="10"
                oninput="syncFader('grids',this.value)">
-        <div class="fader-range"><span>4</span><span>40</span></div>
+        <div class="fader-range"><span>4</span><span>80</span></div>
         <div class="fader-desc">Number of buy/sell levels</div>
       </div>
 
@@ -572,11 +572,11 @@
       <div class="fader-strip">
         <div class="fader-head">
           <span class="fader-name">Order Size</span>
-          <span class="fader-val green" id="fv-size">0.0001 BTC</span>
+          <span class="fader-val green" id="fv-size">0.00005 BTC</span>
         </div>
-        <input type="range" class="c-green" id="s-size" min="0" max="9" step="1" value="0"
+        <input type="range" class="c-green" id="s-size" min="0" max="10" step="1" value="0"
                oninput="syncFader('size',this.value)">
-        <div class="fader-range"><span>0.0001</span><span>0.1</span></div>
+        <div class="fader-range"><span>0.00005</span><span>0.1</span></div>
         <div class="fader-desc">BTC per order (~<span id="size-usd">$7</span> at market)</div>
       </div>
 
@@ -662,7 +662,7 @@
 </div>
 
 <script>
-const SIZE_STEPS = [0.0001,0.0002,0.0005,0.001,0.002,0.005,0.01,0.02,0.05,0.1];
+const SIZE_STEPS = [0.00005,0.0001,0.0002,0.0005,0.001,0.002,0.005,0.01,0.02,0.05,0.1];
 let lastPrice = 0;
 
 function fmtUSD(n, dec=2) { return '$' + Math.abs(n).toLocaleString(undefined,{minimumFractionDigits:dec,maximumFractionDigits:dec}); }
