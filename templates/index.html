@@ -536,9 +536,9 @@
       <div class="fader-strip">
         <div class="fader-head">
           <span class="fader-name">Lower Bound</span>
-          <span class="fader-val amber" id="fv-lower">$70,000</span>
+          <span class="fader-val amber" id="fv-lower">$74,000</span>
         </div>
-        <input type="range" class="c-amber" id="s-lower" min="50000" max="100000" step="500" value="70000"
+        <input type="range" class="c-amber" id="s-lower" min="50000" max="100000" step="100" value="74000"
                oninput="syncFader('lower',this.value)">
         <div class="fader-range"><span>$50k</span><span>$100k</span></div>
         <div class="fader-desc">Bottom of the grid range</div>
@@ -548,9 +548,9 @@
       <div class="fader-strip">
         <div class="fader-head">
           <span class="fader-name">Upper Bound</span>
-          <span class="fader-val amber" id="fv-upper">$78,000</span>
+          <span class="fader-val amber" id="fv-upper">$76,000</span>
         </div>
-        <input type="range" class="c-amber" id="s-upper" min="50000" max="110000" step="500" value="78000"
+        <input type="range" class="c-amber" id="s-upper" min="50000" max="110000" step="100" value="76000"
                oninput="syncFader('upper',this.value)">
         <div class="fader-range"><span>$50k</span><span>$110k</span></div>
         <div class="fader-desc">Top of the grid range</div>
@@ -560,9 +560,9 @@
       <div class="fader-strip">
         <div class="fader-head">
           <span class="fader-name">Grid Lines</span>
-          <span class="fader-val blue" id="fv-grids">16</span>
+          <span class="fader-val blue" id="fv-grids">40</span>
         </div>
-        <input type="range" class="c-blue" id="s-grids" min="4" max="40" step="1" value="16"
+        <input type="range" class="c-blue" id="s-grids" min="4" max="80" step="1" value="40"
                oninput="syncFader('grids',this.value)">
         <div class="fader-range"><span>4</span><span>40</span></div>
         <div class="fader-desc">Number of buy/sell levels</div>
@@ -687,9 +687,9 @@ function syncFader(key, val) {
 function getSize() { return SIZE_STEPS[parseInt(document.getElementById('s-size').value)]; }
 
 function updateEstimate() {
-  const lo   = parseFloat(document.getElementById('s-lower').value) || 70000;
-  const hi   = parseFloat(document.getElementById('s-upper').value) || 78000;
-  const n    = parseInt(document.getElementById('s-grids').value) || 16;
+  const lo   = parseFloat(document.getElementById('s-lower').value) || 73000;
+  const hi   = parseFloat(document.getElementById('s-upper').value) || 75000;
+  const n    = parseInt(document.getElementById('s-grids').value) || 20;
   const size = getSize();
   const space = (hi - lo) / n;
   const gross = space * size;
@@ -855,7 +855,12 @@ async function poll() {
   } catch(e) { console.warn('poll error', e); }
 }
 
-// Init
+// Init — sync fader labels from slider values on load
+['lower','upper','grids','size'].forEach(k => {
+  const id = k === 'size' ? 's-size' : 's-' + k;
+  const el = document.getElementById(id);
+  if (el) syncFader(k, el.value);
+});
 updateEstimate();
 updatePaperMode();
 poll();

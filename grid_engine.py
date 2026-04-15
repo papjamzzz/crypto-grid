@@ -28,9 +28,9 @@ os.makedirs(os.path.dirname(TRADES_FILE), exist_ok=True)
 # ── Default grid settings ─────────────────────────────────────────────────────
 DEFAULT_SETTINGS = {
     "product_id":    "BTC-USD",
-    "lower":         70000.0,    # bottom of grid
-    "upper":         78000.0,    # top of grid
-    "num_grids":     16,         # number of grid lines
+    "lower":         74000.0,    # bottom of grid
+    "upper":         76000.0,    # top of grid
+    "num_grids":     40,         # number of grid lines → $50 spacing
     "order_size":    0.0001,     # BTC per order (~$7.40 at $74k)
     "paper_trading": True,       # ALWAYS start in paper mode
 }
@@ -75,7 +75,7 @@ class GridEngine:
         hi   = self.settings["upper"]
         n    = self.settings["num_grids"]
         step = (hi - lo) / n
-        return [round(lo + i * step, 2) for i in range(n + 1)]
+        return [round(lo + i * step, 2) for i in range(int(n) + 1)]
 
     def _grid_spacing(self):
         lo = self.settings["lower"]
@@ -96,7 +96,8 @@ class GridEngine:
     def start(self, settings=None):
         if settings:
             self.settings.update(settings)
-        if self.running:
+        # Recover from zombie state: running=True but thread dead
+        if self.running and self._thread and self._thread.is_alive():
             return
         self.running   = True
         self._status   = "Starting..."

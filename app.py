@@ -50,9 +50,11 @@ def api_balance():
 def api_start():
     data = request.json or {}
     settings = {}
-    for key in ("lower", "upper", "num_grids", "order_size"):
+    for key in ("lower", "upper", "order_size"):
         if key in data:
             settings[key] = float(data[key])
+    if "num_grids" in data:
+        settings["num_grids"] = int(data["num_grids"])
     if "paper_trading" in data:
         settings["paper_trading"] = bool(data["paper_trading"])
     if "product_id" in data:
@@ -76,6 +78,8 @@ def api_settings():
     return jsonify({"ok": True, "settings": engine.settings})
 
 if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5566))
+    host = "0.0.0.0" if os.environ.get("PORT") else "127.0.0.1"
     print("  ₿  Crypto Grid Bot")
-    print("  🌐 http://localhost:5566")
-    app.run(host="127.0.0.1", port=5566, debug=False)
+    print(f"  🌐 http://{host}:{port}")
+    app.run(host=host, port=port, debug=False)
