@@ -12,7 +12,7 @@ Grid trading bot for BTC-USD (and future pairs). Places a ladder of limit buy/se
 ## Current Settings (paper mode defaults)
 - Range: $74,000 – $76,000
 - Grids: 40 levels → $50 spacing
-- Order size: 0.0001 BTC (~$7.50/order)
+- Order size: 0.00005 BTC (~$3.74/order) — 11 active buy levels on $42
 - Paper trading: always ON by default
 
 ## Key Files
@@ -37,6 +37,7 @@ COINBASE_API_SECRET=-----BEGIN EC PRIVATE KEY-----\n...\n-----END EC PRIVATE KEY
 
 ## Deploy
 - Railway: auto-deploys from GitHub main branch
+- **Live URL:** https://web-production-3d00.up.railway.app
 - PORT env var set automatically by Railway — app binds to it
 - Local: `python app.py` → http://127.0.0.1:5566
 

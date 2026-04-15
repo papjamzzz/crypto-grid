@@ -572,11 +572,11 @@
       <div class="fader-strip">
         <div class="fader-head">
           <span class="fader-name">Order Size</span>
-          <span class="fader-val green" id="fv-size">0.0001 BTC</span>
+          <span class="fader-val green" id="fv-size">0.00005 BTC</span>
         </div>
-        <input type="range" class="c-green" id="s-size" min="0" max="9" step="1" value="0"
+        <input type="range" class="c-green" id="s-size" min="0" max="10" step="1" value="0"
                oninput="syncFader('size',this.value)">
-        <div class="fader-range"><span>0.0001</span><span>0.1</span></div>
+        <div class="fader-range"><span>0.00005</span><span>0.1</span></div>
         <div class="fader-desc">BTC per order (~<span id="size-usd">$7</span> at market)</div>
       </div>
 
@@ -662,7 +662,7 @@
 </div>
 
 <script>
-const SIZE_STEPS = [0.0001,0.0002,0.0005,0.001,0.002,0.005,0.01,0.02,0.05,0.1];
+const SIZE_STEPS = [0.00005,0.0001,0.0002,0.0005,0.001,0.002,0.005,0.01,0.02,0.05,0.1];
 let lastPrice = 0;
 
 function fmtUSD(n, dec=2) { return '$' + Math.abs(n).toLocaleString(undefined,{minimumFractionDigits:dec,maximumFractionDigits:dec}); }
