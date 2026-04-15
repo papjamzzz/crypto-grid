@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#05060a">
 <title>Crypto Grid</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
@@ -42,6 +45,8 @@
     height: 72px; background: rgba(5,6,10,0.97); backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border2);
     display: flex; align-items: center; gap: 6px; padding: 0 24px;
+    padding-left: max(24px, env(safe-area-inset-left));
+    padding-right: max(24px, env(safe-area-inset-right));
     overflow-x: auto; white-space: nowrap;
   }
   .t-logo-wrap {
@@ -263,6 +268,113 @@
   .lc-tag.sell { color: var(--red);   }
   .lc-tag.filled { color: var(--muted); }
   .lc-pnl  { font-family: var(--mono); font-size: 10px; }
+
+  /* ══ MOBILE / iOS RESPONSIVE ══ */
+  @media (max-width: 768px) {
+
+    /* Smooth iOS momentum scroll everywhere */
+    * { -webkit-overflow-scrolling: touch; }
+
+    /* ── Transport bar: 2-row on mobile ── */
+    .transport {
+      height: auto; flex-wrap: wrap; padding: 10px 14px; gap: 8px;
+    }
+    .t-logo-wrap {
+      padding-right: 14px; margin-right: 0; border-right: none;
+      flex: 0 0 auto;
+    }
+    .t-brand  { font-size: 15px; }
+    .t-sub    { font-size: 9px; }
+    .t-status {
+      padding: 0 12px; margin-right: 0; border-right: none;
+      flex: 1 1 auto;
+    }
+    .t-status-text { font-size: 13px; }
+    .t-price       { font-size: 11px; }
+    .t-spacer      { display: none; }
+    .paper-pill    { font-size: 8px; padding: 2px 6px; }
+
+    /* Button row: full-width strip below logo/status */
+    .transport::after {
+      content: ''; flex-basis: 100%; order: 10; /* force buttons to wrap row */
+    }
+    .t-btn {
+      flex: 1; height: 44px; font-size: 11px; padding: 0 12px;
+      margin-left: 0; min-width: 0;
+    }
+    #btn-start, #btn-stop, #btn-coinbase { order: 11; }
+
+    /* ── Metric strip: 2-col grid ── */
+    .metric-strip { grid-template-columns: repeat(2, 1fr); }
+    .metric       { padding: 18px 16px; }
+    .metric:nth-child(2n) { border-right: none; }
+    .metric:nth-child(5)  { border-right: 1px solid var(--border2); }
+    .metric-label  { font-size: 10px; letter-spacing: 1.5px; margin-bottom: 8px; }
+    .metric-value  { font-size: 36px; }
+    .metric-sub    { font-size: 11px; margin-top: 6px; }
+
+    /* ── Pipeline strip: horizontal scroll ── */
+    .pipeline-strip { padding: 14px 14px; gap: 12px; }
+    .pipe-stages    { overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; padding-bottom: 4px; }
+    .pipe-stage     { min-width: 80px; padding: 10px 14px; }
+    .pipe-num       { font-size: 26px; }
+    .pipe-name      { font-size: 10px; }
+    .source-chips   { overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; padding-bottom: 4px; }
+    .src-chip       { padding: 8px 12px; }
+    .src-name, .src-val { font-size: 12px; }
+    .pipe-label     { font-size: 9px; white-space: nowrap; }
+    .pipe-arrow     { font-size: 11px; }
+    .pipe-divider   { display: none; }
+
+    /* ── P&L bar ── */
+    .pnl-bar-row    { padding: 12px 14px; gap: 10px; flex-wrap: wrap; }
+    .pnl-bar-label  { font-size: 12px; }
+    .pnl-bar-track  { flex: 1 1 100%; order: 3; }
+    .pnl-bar-val    { font-size: 12px; width: auto; flex: 1; }
+    .pnl-bar-pct    { font-size: 12px !important; width: auto; }
+
+    /* ── Main layout: single column ── */
+    .layout {
+      display: flex; flex-direction: column;
+      height: auto; overflow: visible;
+    }
+    .left-panel {
+      border-right: none; border-bottom: 1px solid var(--border2);
+      height: auto; overflow: visible;
+    }
+    .fader-scroll  { overflow: visible; max-height: none; }
+    .right-panel   { height: auto; min-height: 320px; }
+    .session-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+    /* ── Table: smaller text, keep scrollable ── */
+    thead th, tbody td { padding: 8px 10px; font-size: 11px; }
+
+    /* ── Ladder: tighter ── */
+    .ladder-wrap   { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); padding: 6px 10px; max-height: 200px; }
+    .ladder-header { padding: 12px 14px; }
+    .lc-price { font-size: 11px; }
+    .lc-tag   { font-size: 8px; }
+
+    /* Bigger range slider thumbs for touch */
+    input[type=range] { height: 5px; }
+    input[type=range]::-webkit-slider-thumb { width: 22px; height: 22px; border-radius: 4px; }
+
+    /* Toggle: slightly larger */
+    .toggle-switch { width: 46px; height: 26px; }
+    .toggle-track::before { height: 20px; width: 20px; }
+    input:checked + .toggle-track::before { transform: translateX(20px); }
+  }
+
+  @media (max-width: 480px) {
+    .metric-strip   { grid-template-columns: repeat(2, 1fr); }
+    .metric-value   { font-size: 28px; }
+    .t-brand        { font-size: 14px; }
+    .pipe-num       { font-size: 22px; }
+    .pipe-stage     { min-width: 70px; padding: 8px 10px; }
+    .t-btn          { font-size: 10px; letter-spacing: 0.3px; }
+    thead th        { font-size: 10px; padding: 7px 8px; }
+    tbody td        { font-size: 11px; padding: 7px 8px; }
+  }
 </style>
 </head>
 <body>
