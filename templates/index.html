@@ -1,448 +1,751 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Crypto Grid Bot</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg:       #080b0f;
-      --surface:  #0d1117;
-      --card:     #111820;
-      --border:   #1e2a38;
-      --green:    #00c896;
-      --red:      #ff4560;
-      --amber:    #f59e0b;
-      --blue:     #3b82f6;
-      --text:     #e2e8f0;
-      --dim:      #4a6080;
-      --mono:     'JetBrains Mono', monospace;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg); color: var(--text); font-family: Inter, sans-serif; font-size: 14px; min-height: 100vh; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crypto Grid</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
-    /* ── Header ── */
-    .header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 16px 24px; border-bottom: 1px solid var(--border);
-      background: var(--surface);
-    }
-    .header-left { display: flex; align-items: center; gap: 12px; }
-    .logo { font-size: 22px; }
-    .app-name { font-weight: 700; font-size: 16px; }
-    .app-sub  { font-size: 11px; color: var(--dim); font-family: var(--mono); letter-spacing: 0.1em; }
-    .header-right { display: flex; align-items: center; gap: 12px; }
-    .price-display { font-family: var(--mono); font-size: 20px; font-weight: 700; color: var(--green); }
-    .paper-badge { background: var(--amber); color: #000; font-family: var(--mono);
-                   font-size: 9px; font-weight: 700; letter-spacing: 0.15em; padding: 3px 8px; }
+  :root {
+    --bg:         #05060a;
+    --surface:    #0b0d14;
+    --card:       #0f1119;
+    --card2:      #131720;
+    --border:     #1c2030;
+    --border2:    #252c3d;
+    --green:      #00d595;
+    --green-dim:  rgba(0,213,149,0.08);
+    --green-glow: rgba(0,213,149,0.25);
+    --red:        #f6465d;
+    --red-dim:    rgba(246,70,93,0.08);
+    --blue:       #4c8dff;
+    --blue-dim:   rgba(76,141,255,0.08);
+    --amber:      #f5a623;
+    --amber-dim:  rgba(245,166,35,0.08);
+    --purple:     #a78bfa;
+    --text:       #e2e8f0;
+    --text2:      #94a3b8;
+    --muted:      #4a5568;
+    --dim:        #2d3748;
+    --mono:       'JetBrains Mono', monospace;
+    --sans:       'Inter', -apple-system, sans-serif;
+  }
 
-    /* ── Buttons ── */
-    .btn { border: none; cursor: pointer; font-family: Inter, sans-serif; font-weight: 600;
-           font-size: 13px; padding: 9px 20px; transition: opacity 0.15s; }
-    .btn:hover { opacity: 0.85; }
-    .btn-green  { background: var(--green);  color: #000; }
-    .btn-red    { background: var(--red);    color: #fff; }
-    .btn-ghost  { background: transparent;   color: var(--text); border: 1px solid var(--border); }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans);
+         font-size: 13px; line-height: 1.5; min-height: 100vh; -webkit-font-smoothing: antialiased; }
 
-    /* ── Layout ── */
-    .main { display: grid; grid-template-columns: 300px 1fr; gap: 0; height: calc(100vh - 57px); }
-    .sidebar { background: var(--surface); border-right: 1px solid var(--border);
-               overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
-    .content { overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+  /* ══ TRANSPORT BAR ══ */
+  .transport {
+    position: sticky; top: 0; z-index: 200;
+    height: 72px; background: rgba(5,6,10,0.97); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border2);
+    display: flex; align-items: center; gap: 6px; padding: 0 24px;
+    overflow-x: auto; white-space: nowrap;
+  }
+  .t-logo-wrap {
+    display: flex; align-items: center; gap: 12px;
+    padding-right: 24px; border-right: 1px solid var(--border2); margin-right: 24px;
+  }
+  .t-brand { font-size: 18px; font-weight: 900; letter-spacing: 0.5px; color: #fff; }
+  .t-sub   { font-size: 10px; font-family: var(--mono); letter-spacing: 2.5px;
+             text-transform: uppercase; color: var(--text2); margin-top: 2px; font-weight: 700; }
+  .t-spacer { flex: 1; }
+  .t-status {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 20px; border-right: 1px solid var(--border2); margin-right: 20px;
+  }
+  .led { width: 11px; height: 11px; border-radius: 50%; background: var(--dim);
+         transition: all 0.4s; flex-shrink: 0; }
+  .led.on { background: var(--green); box-shadow: 0 0 0 3px var(--green-dim), 0 0 14px var(--green-glow);
+            animation: breathe 2.5s ease-in-out infinite; }
+  .led.paper { background: var(--amber); box-shadow: 0 0 8px rgba(245,166,35,0.5); }
+  @keyframes breathe {
+    0%,100% { opacity:1; box-shadow: 0 0 0 3px var(--green-dim), 0 0 10px var(--green-glow); }
+    50%      { opacity:.7; box-shadow: 0 0 0 4px var(--green-dim), 0 0 20px var(--green-glow); }
+  }
+  .t-status-text { font-size: 15px; font-weight: 700; color: #fff; }
+  .t-price { font-family: var(--mono); font-size: 13px; color: var(--green); font-weight: 700; }
+  .t-btn {
+    height: 38px; padding: 0 20px; border-radius: 6px; border: 1px solid transparent;
+    cursor: pointer; font-family: var(--sans); font-size: 12px; font-weight: 800;
+    letter-spacing: 0.8px; text-transform: uppercase; transition: all 0.15s;
+    display: flex; align-items: center; gap: 6px; margin-left: 6px;
+  }
+  #btn-start { background: var(--green); color: #000; border-color: var(--green); }
+  #btn-start:hover { background: #00eaa5; box-shadow: 0 0 16px var(--green-glow); }
+  #btn-stop  { background: transparent; color: var(--red); border-color: rgba(246,70,93,0.35); }
+  #btn-stop:hover { background: var(--red-dim); border-color: var(--red); }
+  #btn-coinbase { background: transparent; color: var(--text2); border-color: var(--border2); }
+  #btn-coinbase:hover { color: var(--text); border-color: var(--text2); }
+  .paper-pill { background: var(--amber-dim); border: 1px solid rgba(245,166,35,0.3);
+                color: var(--amber); font-family: var(--mono); font-size: 9px;
+                font-weight: 700; letter-spacing: 1.5px; padding: 3px 8px; border-radius: 3px; }
 
-    /* ── Stat row ── */
-    .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-    .stat-card { background: var(--card); border: 1px solid var(--border);
-                 border-top: 3px solid var(--border); padding: 16px; }
-    .stat-card.green { border-top-color: var(--green); }
-    .stat-card.red   { border-top-color: var(--red);   }
-    .stat-card.amber { border-top-color: var(--amber); }
-    .stat-card.blue  { border-top-color: var(--blue);  }
-    .stat-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.15em;
-                  color: var(--dim); text-transform: uppercase; margin-bottom: 8px; }
-    .stat-value { font-family: var(--mono); font-size: 26px; font-weight: 700; }
-    .stat-value.pos { color: var(--green); }
-    .stat-value.neg { color: var(--red);   }
-    .stat-sub   { font-size: 11px; color: var(--dim); margin-top: 4px; }
+  /* ══ METRIC STRIP ══ */
+  .metric-strip { display: grid; grid-template-columns: repeat(6,1fr); border-bottom: 1px solid var(--border2); }
+  .metric {
+    padding: 28px 28px; border-right: 1px solid var(--border2);
+    position: relative; overflow: hidden;
+  }
+  .metric:last-child { border-right: none; }
+  .metric::before { content:''; position:absolute; top:0; left:0; right:0; height:3px;
+                    background: transparent; transition: background 0.3s; }
+  .metric.green::before { background: var(--green); }
+  .metric.red::before   { background: var(--red);   }
+  .metric.blue::before  { background: var(--blue);  }
+  .metric.amber::before { background: var(--amber); }
+  .metric.purple::before{ background: var(--purple);}
+  .metric-label { font-size: 13px; font-family: var(--mono); font-weight: 700;
+                  letter-spacing: 2.5px; text-transform: uppercase; color: #fff; margin-bottom: 12px; }
+  .metric-value { font-size: 64px; font-weight: 900; line-height: 1; color: #fff; font-variant-numeric: tabular-nums; }
+  .metric-value.green  { color: var(--green); }
+  .metric-value.red    { color: var(--red);   }
+  .metric-value.blue   { color: var(--blue);  }
+  .metric-value.amber  { color: var(--amber); }
+  .metric-value.purple { color: var(--purple);}
+  .metric-sub { font-size: 14px; font-weight: 600; color: var(--text2);
+                margin-top: 10px; font-family: var(--mono); }
 
-    /* ── Grid visual ── */
-    .grid-panel { background: var(--card); border: 1px solid var(--border); padding: 20px; }
-    .panel-title { font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em;
-                   color: var(--dim); text-transform: uppercase; margin-bottom: 16px; }
-    .grid-levels { display: flex; flex-direction: column; gap: 2px; max-height: 380px; overflow-y: auto; }
-    .grid-row {
-      display: grid; grid-template-columns: 100px 60px 1fr 80px;
-      align-items: center; gap: 8px; padding: 5px 8px;
-      font-family: var(--mono); font-size: 11px;
-    }
-    .grid-row.buy  { border-left: 3px solid var(--green); background: rgba(0,200,150,0.05); }
-    .grid-row.sell { border-left: 3px solid var(--red);   background: rgba(255,69,96,0.05); }
-    .grid-row.filled-buy  { border-left: 3px solid var(--green); background: rgba(0,200,150,0.12); opacity: 0.6; }
-    .grid-row.filled-sell { border-left: 3px solid var(--red);   background: rgba(255,69,96,0.12);  opacity: 0.6; }
-    .grid-row.current-price { border-left: 3px solid var(--amber); background: rgba(245,158,11,0.1); }
-    .tag-buy  { color: var(--green); font-weight: 700; font-size: 10px; }
-    .tag-sell { color: var(--red);   font-weight: 700; font-size: 10px; }
-    .tag-filled { color: var(--dim); font-size: 10px; }
-    .fill-bar { height: 4px; background: var(--border); }
-    .fill-bar-inner { height: 100%; background: var(--green); }
+  /* ══ GRID PIPELINE STRIP ══ */
+  .pipeline-strip {
+    background: var(--surface); border-bottom: 1px solid var(--border2);
+    padding: 22px 28px; display: flex; flex-direction: column; gap: 18px;
+  }
+  .pipe-label { font-family: var(--mono); font-size: 10px; font-weight: 800;
+                letter-spacing: 2.5px; text-transform: uppercase; color: #fff;
+                white-space: nowrap; align-self: center; }
+  .pipe-stages { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; }
+  .pipe-stage {
+    display: flex; flex-direction: column; align-items: center; gap: 7px;
+    min-width: 110px; background: var(--card); border: 1px solid var(--border2);
+    border-radius: 8px; padding: 16px 22px;
+  }
+  .pipe-stage-active  { border-color: rgba(0,213,149,0.4);  background: rgba(0,213,149,0.07); }
+  .pipe-stage-price   { border-color: rgba(76,141,255,0.4); background: rgba(76,141,255,0.07); }
+  .pipe-stage-profit  { border-color: rgba(245,166,35,0.4); background: rgba(245,166,35,0.07); }
+  .pipe-num { font-family: var(--mono); font-size: 42px; font-weight: 900; line-height:1; color:#fff; }
+  .pipe-num.green  { color: var(--green); }
+  .pipe-num.blue   { color: var(--blue);  }
+  .pipe-num.amber  { color: var(--amber); }
+  .pipe-num.red    { color: var(--red);   }
+  .pipe-name { font-family: var(--mono); font-size: 13px; font-weight: 700;
+               letter-spacing: 1.5px; text-transform: uppercase; color: var(--text2); white-space: nowrap; }
+  .pipe-arrow { color: var(--text2); font-size: 14px; font-weight: 700; flex-shrink: 0; }
+  .pipe-divider { width:1px; height:28px; background: var(--border2); margin: 0 10px; align-self: center; flex-shrink:0; }
 
-    /* ── Trade log ── */
-    .trade-table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 11px; }
-    .trade-table th { text-align: left; padding: 8px 10px; color: var(--dim);
-                      font-size: 9px; letter-spacing: 0.1em; border-bottom: 1px solid var(--border); }
-    .trade-table td { padding: 7px 10px; border-bottom: 1px solid rgba(30,42,56,0.5); }
-    .trade-table tr:hover td { background: rgba(255,255,255,0.02); }
-    .pnl-pos { color: var(--green); }
-    .pnl-neg { color: var(--red);   }
-    .side-buy  { color: var(--green); font-weight: 700; }
-    .side-sell { color: var(--red);   font-weight: 700; }
+  /* Source chips (exchange data feeds) */
+  .source-chips { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; overflow-x: auto; }
+  .src-chip { display: flex; align-items: center; gap: 8px; background: var(--card);
+              border: 1px solid var(--border2); border-radius: 6px; padding: 10px 18px;
+              white-space: nowrap; flex-shrink: 0; }
+  .src-dot { width:8px; height:8px; border-radius:50%; background: var(--muted); flex-shrink:0; }
+  .src-dot.green { background: var(--green); box-shadow: 0 0 7px var(--green-glow); }
+  .src-dot.amber { background: var(--amber); }
+  .src-dot.blue  { background: var(--blue);  }
+  .src-name { font-family: var(--mono); font-size: 15px; font-weight: 700; color: #fff; letter-spacing: 0.5px; }
+  .src-val  { font-family: var(--mono); font-size: 15px; font-weight: 600; color: var(--text2); letter-spacing: 0.5px; }
+  .src-val.green { color: var(--green); }
+  .src-val.amber { color: var(--amber); }
+  .src-val.blue  { color: var(--blue);  }
 
-    /* ── Sidebar controls ── */
-    .ctrl-group { display: flex; flex-direction: column; gap: 10px; }
-    .ctrl-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em;
-                  color: var(--dim); text-transform: uppercase; margin-bottom: 2px; }
-    .ctrl-row { display: flex; align-items: center; gap: 8px; }
-    .ctrl-input { background: var(--bg); border: 1px solid var(--border); color: var(--text);
-                  font-family: var(--mono); font-size: 12px; padding: 7px 10px; width: 100%; }
-    .ctrl-input:focus { outline: none; border-color: var(--green); }
-    .slider-wrap { display: flex; flex-direction: column; gap: 4px; }
-    .range-input { width: 100%; accent-color: var(--green); }
-    .range-val { font-family: var(--mono); font-size: 12px; color: var(--green); }
-    .section-title { font-family: var(--mono); font-size: 9px; letter-spacing: 0.15em;
-                     color: var(--dim); text-transform: uppercase; padding-bottom: 8px;
-                     border-bottom: 1px solid var(--border); }
-    .balance-row { display: flex; justify-content: space-between; align-items: baseline; }
-    .balance-label { font-size: 11px; color: var(--dim); }
-    .balance-val { font-family: var(--mono); font-size: 13px; font-weight: 700; }
-    .toggle-wrap { display: flex; align-items: center; justify-content: space-between; }
-    .toggle-label { font-size: 13px; }
-    .toggle { position: relative; width: 44px; height: 24px; }
-    .toggle input { opacity: 0; width: 0; height: 0; }
-    .toggle-slider { position: absolute; inset: 0; background: var(--border); cursor: pointer; transition: 0.2s; }
-    .toggle-slider:before { content: ""; position: absolute; height: 16px; width: 16px;
-      left: 4px; bottom: 4px; background: var(--dim); transition: 0.2s; }
-    input:checked + .toggle-slider { background: var(--amber); }
-    input:checked + .toggle-slider:before { transform: translateX(20px); background: #000; }
-    .profit-estimate { background: rgba(0,200,150,0.08); border: 1px solid rgba(0,200,150,0.2);
-                       padding: 12px; font-family: var(--mono); font-size: 11px; }
-    .profit-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
-    .profit-key { color: var(--dim); }
-    .profit-val { color: var(--green); }
-    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--dim); display: inline-block; }
-    .status-dot.running { background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse 2s infinite; }
-    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
-  </style>
+  /* ══ P&L PROGRESS BAR ══ */
+  .pnl-bar-row {
+    display: flex; align-items: center; gap: 16px;
+    padding: 16px 28px; border-bottom: 1px solid var(--border); background: var(--surface);
+  }
+  .pnl-bar-label { font-family: var(--mono); font-size: 15px; font-weight: 700; color: #fff; white-space: nowrap; }
+  .pnl-bar-track { flex:1; height:8px; background: var(--dim); border-radius:4px; overflow:hidden; }
+  .pnl-bar-fill  { height:100%; border-radius:3px; transition: width 0.6s ease, background 0.3s; }
+  .pnl-bar-val   { font-family: var(--mono); font-size: 15px; font-weight: 700; color: #fff; width:120px; text-align:right; }
+
+  /* ══ MAIN LAYOUT ══ */
+  .layout { display: grid; grid-template-columns: 300px 1fr; height: 45vh; overflow: hidden; }
+
+  /* ══ LEFT PANEL — GRID PROCESSOR ══ */
+  .left-panel { border-right: 1px solid var(--border); display: flex; flex-direction: column;
+                overflow: hidden; background: var(--surface); }
+  .panel-title-row { display: flex; align-items: center; justify-content: space-between;
+                     padding: 12px 16px; border-bottom: 1px solid var(--border); }
+  .panel-label { font-family: var(--mono); font-size: 9px; letter-spacing: 2px;
+                 text-transform: uppercase; color: var(--muted); }
+  .panel-badge { font-family: var(--mono); font-size: 9px; padding: 2px 7px; border-radius: 3px;
+                 background: var(--amber-dim); color: var(--amber);
+                 border: 1px solid rgba(245,166,35,0.15); letter-spacing: 1px; }
+  .panel-badge.green { background: var(--green-dim); color: var(--green); border-color: rgba(0,213,149,0.15); }
+  .fader-scroll { overflow-y: auto; flex: 1; }
+  .fader-strip { padding: 7px 16px; border-bottom: 1px solid var(--border); transition: background 0.15s; }
+  .fader-strip:hover { background: rgba(255,255,255,0.015); }
+  .fader-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+  .fader-name { font-size: 10px; font-weight: 600; color: var(--text2); letter-spacing: 0.3px; }
+  .fader-val  { font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--green);
+                cursor: text; border-bottom: 1px dashed transparent; transition: border-color 0.15s; padding-bottom: 1px; }
+  .fader-val:hover { border-bottom-color: rgba(0,213,149,0.4); }
+  .fader-val.amber { color: var(--amber); }
+  .fader-val.amber:hover { border-bottom-color: rgba(245,166,35,0.4); }
+  .fader-val.blue  { color: var(--blue); }
+  .fader-val.blue:hover { border-bottom-color: rgba(76,141,255,0.4); }
+  .fader-val.red   { color: var(--red); }
+  .fader-desc  { font-size: 10px; color: var(--muted); margin-top: 5px; }
+  .fader-range { display: flex; justify-content: space-between; font-family: var(--mono);
+                 font-size: 9px; color: var(--dim); margin-top: 4px; }
+  input[type=range] { -webkit-appearance: none; width: 100%; height: 3px; border-radius: 2px;
+                      background: var(--dim); outline: none; cursor: pointer; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width:14px; height:14px;
+    border-radius: 3px; cursor: pointer; transition: box-shadow 0.15s; }
+  input[type=range].c-green::-webkit-slider-thumb { background: var(--green); box-shadow: 0 0 6px var(--green-glow); }
+  input[type=range].c-amber::-webkit-slider-thumb { background: var(--amber); box-shadow: 0 0 6px rgba(245,166,35,0.3); }
+  input[type=range].c-blue::-webkit-slider-thumb  { background: var(--blue);  box-shadow: 0 0 6px rgba(76,141,255,0.3); }
+  input[type=range].c-red::-webkit-slider-thumb   { background: var(--red);   box-shadow: 0 0 6px rgba(246,70,93,0.3); }
+
+  /* Paper mode toggle */
+  .notif-row { display: flex; align-items: center; justify-content: space-between;
+               padding: 10px 16px; border-bottom: 1px solid var(--border); }
+  .notif-label { font-size: 11px; color: var(--text2); }
+  .toggle-switch { position: relative; width: 40px; height: 22px; }
+  .toggle-switch input { opacity:0; width:0; height:0; }
+  .toggle-track { position:absolute; inset:0; background: var(--dim); border-radius:11px;
+                  cursor:pointer; transition:0.2s; }
+  .toggle-track::before { content:""; position:absolute; height:16px; width:16px; left:3px; top:3px;
+                          background: var(--muted); border-radius:50%; transition:0.2s; }
+  input:checked + .toggle-track { background: var(--amber); }
+  input:checked + .toggle-track::before { transform: translateX(18px); background: #000; }
+
+  /* ══ RIGHT PANEL — SESSION VIEW ══ */
+  .right-panel { display: flex; flex-direction: column; overflow: hidden; }
+  .session-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 20px; border-bottom: 1px solid var(--border); background: var(--surface); flex-shrink:0;
+  }
+  .session-title { font-family: var(--mono); font-size: 9px; letter-spacing: 2px;
+                   text-transform: uppercase; color: var(--muted); }
+  .session-count { font-family: var(--mono); font-size: 11px; color: var(--text2); }
+  .session-table-wrap { flex: 1; overflow-y: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th { position: sticky; top: 0; background: var(--surface); z-index: 10;
+             padding: 10px 16px; text-align: left; font-family: var(--mono); font-size: 10px;
+             font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted);
+             border-bottom: 1px solid var(--border2); white-space: nowrap; }
+  tbody td { padding: 10px 16px; border-bottom: 1px solid var(--border); font-family: var(--mono);
+             font-size: 12px; white-space: nowrap; }
+  tbody tr:hover td { background: rgba(255,255,255,0.02); }
+  .td-buy  { color: var(--green); font-weight: 700; }
+  .td-sell { color: var(--red);   font-weight: 700; }
+  .td-pos  { color: var(--green); }
+  .td-neg  { color: var(--red);   }
+  .td-dim  { color: var(--muted); }
+  .status-pill { font-family: var(--mono); font-size: 10px; font-weight: 700;
+                 padding: 2px 8px; border-radius: 3px; letter-spacing: 1px; display: inline-block; }
+  .status-pill.fill   { background: var(--green-dim); color: var(--green); border: 1px solid rgba(0,213,149,0.2); }
+  .status-pill.open   { background: var(--blue-dim);  color: var(--blue);  border: 1px solid rgba(76,141,255,0.2); }
+  .status-pill.paper  { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(245,166,35,0.2); }
+
+  /* ══ GRID LADDER (below layout) ══ */
+  .ladder-section { border-top: 1px solid var(--border2); }
+  .ladder-header { display: flex; align-items: center; justify-content: space-between;
+                   padding: 14px 28px; border-bottom: 1px solid var(--border); background: var(--surface); }
+  .ladder-title { font-family: var(--mono); font-size: 10px; letter-spacing: 2px;
+                  text-transform: uppercase; color: var(--muted); }
+  .ladder-wrap { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+                 gap: 2px; padding: 8px 16px; max-height: 240px; overflow-y: auto; background: var(--bg); }
+  .ladder-cell {
+    padding: 8px 12px; border: 1px solid var(--border); border-radius: 4px;
+    display: flex; flex-direction: column; gap: 3px; transition: background 0.15s;
+  }
+  .ladder-cell.buy   { border-left: 3px solid var(--green); background: var(--green-dim); }
+  .ladder-cell.sell  { border-left: 3px solid var(--red);   background: var(--red-dim);   }
+  .ladder-cell.filled { opacity: 0.45; }
+  .ladder-cell.current { border-left: 3px solid var(--amber); background: var(--amber-dim); }
+  .lc-price { font-family: var(--mono); font-size: 12px; font-weight: 700; color: #fff; }
+  .lc-tag   { font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: 1px; }
+  .lc-tag.buy  { color: var(--green); }
+  .lc-tag.sell { color: var(--red);   }
+  .lc-tag.filled { color: var(--muted); }
+  .lc-pnl  { font-family: var(--mono); font-size: 10px; }
+</style>
 </head>
 <body>
 
-<!-- Header -->
-<div class="header">
-  <div class="header-left">
-    <span class="logo">₿</span>
+<!-- ══ TRANSPORT BAR ══ -->
+<div class="transport">
+  <div class="t-logo-wrap">
     <div>
-      <div class="app-name">Crypto Grid Bot</div>
-      <div class="app-sub">COINBASE ADVANCED TRADE</div>
+      <div class="t-brand">Crypto Grid</div>
+      <div class="t-sub">Coinbase Advanced Trade</div>
     </div>
   </div>
-  <div class="header-right">
-    <div class="price-display" id="hdr-price">—</div>
-    <span class="paper-badge" id="paper-badge">PAPER</span>
-    <span class="status-dot" id="status-dot"></span>
-    <span id="status-msg" style="font-size:12px;color:var(--dim);">Idle</span>
-    <button class="btn btn-green" id="btn-start" onclick="startGrid()">▶ START</button>
-    <button class="btn btn-red"   id="btn-stop"  onclick="stopGrid()">■ STOP</button>
+
+  <div class="t-status">
+    <div class="led" id="led"></div>
+    <div>
+      <div class="t-status-text" id="t-status-text">Idle</div>
+      <div class="t-price" id="t-price">BTC $—</div>
+    </div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:10px;padding:0 20px;border-right:1px solid var(--border2);margin-right:20px;">
+    <span class="paper-pill" id="paper-pill">📋 PAPER</span>
+    <span style="font-family:var(--mono);font-size:11px;color:var(--text2);" id="t-grid-info">—</span>
+  </div>
+
+  <div class="t-spacer"></div>
+
+  <button class="t-btn" id="btn-start"    onclick="startGrid()">▶ START</button>
+  <button class="t-btn" id="btn-stop"     onclick="stopGrid()">■ STOP</button>
+  <button class="t-btn" id="btn-coinbase" onclick="window.open('https://www.coinbase.com/advanced-trade','_blank')">COINBASE ↗</button>
+</div>
+
+<!-- ══ METRIC STRIP ══ -->
+<div class="metric-strip">
+  <div class="metric green">
+    <div class="metric-label">Total P&L</div>
+    <div class="metric-value green" id="m-pnl">+$0.00</div>
+    <div class="metric-sub" id="m-pnl-sub">paper mode</div>
+  </div>
+  <div class="metric blue">
+    <div class="metric-label">Open Orders</div>
+    <div class="metric-value blue" id="m-orders">0</div>
+    <div class="metric-sub" id="m-orders-sub">0 buys · 0 sells</div>
+  </div>
+  <div class="metric green">
+    <div class="metric-label">Total Fills</div>
+    <div class="metric-value" id="m-fills">0</div>
+    <div class="metric-sub">completed round trips</div>
+  </div>
+  <div class="metric amber">
+    <div class="metric-label">Win Rate</div>
+    <div class="metric-value amber" id="m-winrate">—</div>
+    <div class="metric-sub" id="m-wins-sub">— wins / — losses</div>
+  </div>
+  <div class="metric">
+    <div class="metric-label">Grid Spacing</div>
+    <div class="metric-value" id="m-spacing">—</div>
+    <div class="metric-sub" id="m-spacing-sub">per level</div>
+  </div>
+  <div class="metric purple">
+    <div class="metric-label">Est / Trade</div>
+    <div class="metric-value purple" id="m-per-trade">—</div>
+    <div class="metric-sub">after fees</div>
   </div>
 </div>
 
-<div class="main">
-
-  <!-- Sidebar -->
-  <div class="sidebar">
-
-    <!-- Balance -->
-    <div>
-      <div class="section-title">Account Balance</div>
-      <div style="margin-top:12px;display:flex;flex-direction:column;gap:6px;">
-        <div class="balance-row">
-          <span class="balance-label">USD</span>
-          <span class="balance-val" id="bal-usd">—</span>
-        </div>
-        <div class="balance-row">
-          <span class="balance-label">BTC</span>
-          <span class="balance-val" id="bal-btc">—</span>
-        </div>
-        <div class="balance-row">
-          <span class="balance-label">Total</span>
-          <span class="balance-val" id="bal-total" style="color:var(--green);">—</span>
-        </div>
+<!-- ══ GRID PIPELINE STRIP ══ -->
+<div class="pipeline-strip">
+  <div style="display:flex;align-items:center;gap:12px;overflow-x:auto;">
+    <span class="pipe-label">GRID PIPELINE</span>
+    <div class="pipe-stages">
+      <div class="pipe-stage">
+        <div class="pipe-num" id="p-range">—</div>
+        <div class="pipe-name">RANGE</div>
+      </div>
+      <div class="pipe-arrow">▶</div>
+      <div class="pipe-stage pipe-stage-active">
+        <div class="pipe-num green" id="p-levels">—</div>
+        <div class="pipe-name">LEVELS</div>
+      </div>
+      <div class="pipe-arrow">▶</div>
+      <div class="pipe-stage">
+        <div class="pipe-num blue" id="p-buys">—</div>
+        <div class="pipe-name">BUYS</div>
+      </div>
+      <div class="pipe-arrow">▶</div>
+      <div class="pipe-stage">
+        <div class="pipe-num red" id="p-sells">—</div>
+        <div class="pipe-name">SELLS</div>
+      </div>
+      <div class="pipe-arrow">▶</div>
+      <div class="pipe-stage pipe-stage-profit">
+        <div class="pipe-num amber" id="p-fills">—</div>
+        <div class="pipe-name">FILLED</div>
       </div>
     </div>
 
-    <!-- Paper mode toggle -->
-    <div>
-      <div class="section-title">Mode</div>
-      <div class="toggle-wrap" style="margin-top:12px;">
-        <span class="toggle-label">Paper Trading</span>
-        <label class="toggle">
+    <div class="pipe-divider"></div>
+
+    <!-- Exchange data feeds -->
+    <span class="pipe-label">FEEDS</span>
+    <div class="source-chips">
+      <div class="src-chip">
+        <div class="src-dot green" id="dot-cb"></div>
+        <span class="src-name">Coinbase</span>
+        <span class="src-val green" id="feed-btc">—</span>
+      </div>
+      <div class="src-chip">
+        <div class="src-dot blue"></div>
+        <span class="src-name">Spread</span>
+        <span class="src-val blue" id="feed-spread">—</span>
+      </div>
+      <div class="src-chip">
+        <div class="src-dot amber"></div>
+        <span class="src-name">Range</span>
+        <span class="src-val amber" id="feed-range">—</span>
+      </div>
+      <div class="src-chip">
+        <div class="src-dot" id="dot-paper"></div>
+        <span class="src-name" id="feed-mode-name">Paper</span>
+        <span class="src-val" id="feed-mode-val">Simulated</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ P&L BAR ══ -->
+<div class="pnl-bar-row">
+  <span class="pnl-bar-label">DAILY P&L</span>
+  <div class="pnl-bar-track">
+    <div class="pnl-bar-fill" id="pnl-bar-fill" style="width:0%;background:var(--green);"></div>
+  </div>
+  <span class="pnl-bar-val" id="pnl-bar-val">$0.00 / —</span>
+  <span style="font-family:var(--mono);font-size:13px;color:var(--text2);width:40px;text-align:right;" id="pnl-bar-pct">0%</span>
+</div>
+
+<!-- ══ MAIN LAYOUT ══ -->
+<div class="layout">
+
+  <!-- LEFT: GRID PROCESSOR (faders) -->
+  <div class="left-panel">
+    <div class="panel-title-row">
+      <span class="panel-label">Grid Processor</span>
+      <span class="panel-badge" id="panel-badge">PAPER</span>
+    </div>
+    <div class="fader-scroll">
+
+      <!-- Paper mode toggle -->
+      <div class="notif-row">
+        <span class="notif-label">Paper Trading</span>
+        <label class="toggle-switch">
           <input type="checkbox" id="paper-toggle" checked onchange="updatePaperMode()">
-          <span class="toggle-slider"></span>
+          <span class="toggle-track"></span>
         </label>
       </div>
-      <div style="font-size:11px;color:var(--dim);margin-top:6px;" id="mode-note">
-        Simulated fills — no real orders placed.
+
+      <!-- Lower bound -->
+      <div class="fader-strip">
+        <div class="fader-head">
+          <span class="fader-name">Lower Bound</span>
+          <span class="fader-val amber" id="fv-lower">$70,000</span>
+        </div>
+        <input type="range" class="c-amber" id="s-lower" min="50000" max="100000" step="500" value="70000"
+               oninput="syncFader('lower',this.value)">
+        <div class="fader-range"><span>$50k</span><span>$100k</span></div>
+        <div class="fader-desc">Bottom of the grid range</div>
       </div>
-    </div>
 
-    <!-- Grid settings -->
-    <div>
-      <div class="section-title">Grid Settings</div>
-      <div class="ctrl-group" style="margin-top:12px;">
-
-        <div>
-          <div class="ctrl-label">Lower Bound ($)</div>
-          <input class="ctrl-input" type="number" id="s-lower" value="70000" step="500" oninput="updateEstimate()">
+      <!-- Upper bound -->
+      <div class="fader-strip">
+        <div class="fader-head">
+          <span class="fader-name">Upper Bound</span>
+          <span class="fader-val amber" id="fv-upper">$78,000</span>
         </div>
-        <div>
-          <div class="ctrl-label">Upper Bound ($)</div>
-          <input class="ctrl-input" type="number" id="s-upper" value="78000" step="500" oninput="updateEstimate()">
-        </div>
+        <input type="range" class="c-amber" id="s-upper" min="50000" max="110000" step="500" value="78000"
+               oninput="syncFader('upper',this.value)">
+        <div class="fader-range"><span>$50k</span><span>$110k</span></div>
+        <div class="fader-desc">Top of the grid range</div>
+      </div>
 
-        <div class="slider-wrap">
+      <!-- Grid lines -->
+      <div class="fader-strip">
+        <div class="fader-head">
+          <span class="fader-name">Grid Lines</span>
+          <span class="fader-val blue" id="fv-grids">16</span>
+        </div>
+        <input type="range" class="c-blue" id="s-grids" min="4" max="40" step="1" value="16"
+               oninput="syncFader('grids',this.value)">
+        <div class="fader-range"><span>4</span><span>40</span></div>
+        <div class="fader-desc">Number of buy/sell levels</div>
+      </div>
+
+      <!-- Order size -->
+      <div class="fader-strip">
+        <div class="fader-head">
+          <span class="fader-name">Order Size</span>
+          <span class="fader-val green" id="fv-size">0.0001 BTC</span>
+        </div>
+        <input type="range" class="c-green" id="s-size" min="0" max="9" step="1" value="0"
+               oninput="syncFader('size',this.value)">
+        <div class="fader-range"><span>0.0001</span><span>0.1</span></div>
+        <div class="fader-desc">BTC per order (~<span id="size-usd">$7</span> at market)</div>
+      </div>
+
+      <!-- Estimate panel -->
+      <div class="fader-strip" style="background:rgba(0,213,149,0.03);">
+        <div style="display:flex;flex-direction:column;gap:6px;padding:2px 0;">
           <div style="display:flex;justify-content:space-between;">
-            <div class="ctrl-label">Grid Lines</div>
-            <span class="range-val" id="grids-val">16</span>
+            <span class="fader-name">Spacing</span>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--green);" id="est-spacing">—</span>
           </div>
-          <input class="range-input" type="range" id="s-grids" min="4" max="40" value="16"
-                 oninput="document.getElementById('grids-val').textContent=this.value;updateEstimate()">
-        </div>
-
-        <div class="slider-wrap">
           <div style="display:flex;justify-content:space-between;">
-            <div class="ctrl-label">Order Size (BTC)</div>
-            <span class="range-val" id="size-val">0.0001</span>
+            <span class="fader-name">$ / Trade (net)</span>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--green);" id="est-net">—</span>
           </div>
-          <input class="range-input" type="range" id="s-size" min="1" max="100" value="1"
-                 oninput="updateSizeLabel(this.value);updateEstimate()">
+          <div style="display:flex;justify-content:space-between;">
+            <span class="fader-name">Capital Needed</span>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--amber);" id="est-cap">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;">
+            <span class="fader-name">10 fills/day est</span>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--purple);" id="est-daily">—</span>
+          </div>
         </div>
+      </div>
 
+    </div><!-- fader-scroll -->
+
+    <!-- Balance footer -->
+    <div style="border-top:1px solid var(--border);padding:12px 16px;background:var(--bg);">
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+        <span class="fader-name">USD</span>
+        <span style="font-family:var(--mono);font-size:12px;color:#fff;" id="bal-usd">—</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+        <span class="fader-name">BTC</span>
+        <span style="font-family:var(--mono);font-size:12px;color:var(--amber);" id="bal-btc">—</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;">
+        <span class="fader-name">Total</span>
+        <span style="font-family:var(--mono);font-size:12px;color:var(--green);font-weight:700;" id="bal-total">—</span>
       </div>
     </div>
+  </div><!-- left-panel -->
 
-    <!-- Profit estimate -->
-    <div class="profit-estimate" id="profit-estimate">
-      <div class="profit-row"><span class="profit-key">Grid spacing</span><span class="profit-val" id="est-spacing">—</span></div>
-      <div class="profit-row"><span class="profit-key">$/trade (gross)</span><span class="profit-val" id="est-per-trade">—</span></div>
-      <div class="profit-row"><span class="profit-key">Capital needed</span><span class="profit-val" id="est-capital">—</span></div>
-      <div class="profit-row" style="margin-top:8px;border-top:1px solid rgba(0,200,150,0.2);padding-top:8px;">
-        <span class="profit-key">10 fills/day</span><span class="profit-val" id="est-daily">—</span></div>
+  <!-- RIGHT: SESSION VIEW -->
+  <div class="right-panel">
+    <div class="session-header">
+      <span class="session-title">Session View</span>
+      <span class="session-count" id="session-count">0 fills</span>
     </div>
-
-  </div>
-
-  <!-- Main content -->
-  <div class="content">
-
-    <!-- Stats row -->
-    <div class="stat-grid">
-      <div class="stat-card green">
-        <div class="stat-label">Total P&L</div>
-        <div class="stat-value" id="stat-pnl">$0.00</div>
-        <div class="stat-sub">paper mode</div>
-      </div>
-      <div class="stat-card blue">
-        <div class="stat-label">Total Fills</div>
-        <div class="stat-value" id="stat-fills">0</div>
-        <div class="stat-sub">round trips</div>
-      </div>
-      <div class="stat-card amber">
-        <div class="stat-label">Open Orders</div>
-        <div class="stat-value" id="stat-orders">0</div>
-        <div class="stat-sub" id="stat-orders-sub">0 buys · 0 sells</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Win Rate</div>
-        <div class="stat-value" id="stat-winrate">—</div>
-        <div class="stat-sub" id="stat-wins">— wins / — losses</div>
-      </div>
-    </div>
-
-    <!-- Grid levels -->
-    <div class="grid-panel">
-      <div class="panel-title">Grid Ladder</div>
-      <div class="grid-levels" id="grid-levels">
-        <div style="color:var(--dim);font-family:var(--mono);font-size:12px;">Start the grid to see levels.</div>
-      </div>
-    </div>
-
-    <!-- Trade log -->
-    <div class="grid-panel">
-      <div class="panel-title">Trade Log</div>
-      <table class="trade-table">
+    <div class="session-table-wrap">
+      <table>
         <thead>
           <tr>
-            <th>TIME</th>
-            <th>SIDE</th>
-            <th>LEVEL</th>
-            <th>FILL PRICE</th>
-            <th>SIZE</th>
+            <th>#</th>
+            <th>Time</th>
+            <th>Side</th>
+            <th>Grid Level</th>
+            <th>Fill Price</th>
+            <th>Size</th>
             <th>P&L</th>
+            <th>Status</th>
           </tr>
         </thead>
-        <tbody id="trade-log">
-          <tr><td colspan="6" style="color:var(--dim);padding:16px 10px;">No fills yet.</td></tr>
+        <tbody id="trade-tbody">
+          <tr><td colspan="8" class="td-dim" style="padding:20px 16px;">Start the grid to see fills.</td></tr>
         </tbody>
       </table>
     </div>
+  </div>
 
+</div><!-- layout -->
+
+<!-- ══ GRID LADDER ══ -->
+<div class="ladder-section">
+  <div class="ladder-header">
+    <span class="ladder-title">Grid Ladder</span>
+    <span style="font-family:var(--mono);font-size:11px;color:var(--text2);" id="ladder-info">—</span>
+  </div>
+  <div class="ladder-wrap" id="ladder-wrap">
+    <div style="font-family:var(--mono);font-size:12px;color:var(--muted);padding:12px;">Start the grid to see levels.</div>
   </div>
 </div>
 
 <script>
-let lastStatus = {};
 const SIZE_STEPS = [0.0001,0.0002,0.0005,0.001,0.002,0.005,0.01,0.02,0.05,0.1];
+let lastPrice = 0;
 
-function updateSizeLabel(v) {
-  const idx = Math.min(Math.round((v/100) * (SIZE_STEPS.length-1)), SIZE_STEPS.length-1);
-  document.getElementById('size-val').textContent = SIZE_STEPS[idx];
+function fmtUSD(n, dec=2) { return '$' + Math.abs(n).toLocaleString(undefined,{minimumFractionDigits:dec,maximumFractionDigits:dec}); }
+function fmtSign(n, dec=4) { return (n>=0?'+':'-') + '$' + Math.abs(n).toFixed(dec); }
+
+function syncFader(key, val) {
+  val = parseFloat(val);
+  if (key === 'lower') {
+    document.getElementById('fv-lower').textContent = '$' + val.toLocaleString();
+  } else if (key === 'upper') {
+    document.getElementById('fv-upper').textContent = '$' + val.toLocaleString();
+  } else if (key === 'grids') {
+    document.getElementById('fv-grids').textContent = val;
+  } else if (key === 'size') {
+    const size = SIZE_STEPS[Math.round(val)];
+    document.getElementById('fv-size').textContent = size + ' BTC';
+    document.getElementById('size-usd').textContent = fmtUSD(size * (lastPrice || 74000), 0);
+  }
+  updateEstimate();
 }
 
-function getSize() {
-  const v = parseFloat(document.getElementById('s-size').value);
-  const idx = Math.min(Math.round((v/100) * (SIZE_STEPS.length-1)), SIZE_STEPS.length-1);
-  return SIZE_STEPS[idx];
-}
+function getSize() { return SIZE_STEPS[parseInt(document.getElementById('s-size').value)]; }
 
 function updateEstimate() {
-  const lo    = parseFloat(document.getElementById('s-lower').value) || 70000;
-  const hi    = parseFloat(document.getElementById('s-upper').value) || 78000;
-  const n     = parseInt(document.getElementById('s-grids').value)   || 16;
-  const size  = getSize();
+  const lo   = parseFloat(document.getElementById('s-lower').value) || 70000;
+  const hi   = parseFloat(document.getElementById('s-upper').value) || 78000;
+  const n    = parseInt(document.getElementById('s-grids').value) || 16;
+  const size = getSize();
   const space = (hi - lo) / n;
   const gross = space * size;
-  const fees  = gross * 0.002;
-  const net   = gross - fees;
-  const cap   = lo * size * (n / 2);  // rough capital needed for buy side
-  document.getElementById('est-spacing').textContent  = `$${space.toFixed(0)}`;
-  document.getElementById('est-per-trade').textContent = `$${net.toFixed(4)}`;
-  document.getElementById('est-capital').textContent   = `$${cap.toFixed(2)}`;
-  document.getElementById('est-daily').textContent     = `$${(net * 10).toFixed(3)}/day`;
+  const net   = gross * 0.998;
+  const cap   = lo * size * (n / 2);
+  document.getElementById('est-spacing').textContent = '$' + space.toFixed(0);
+  document.getElementById('est-net').textContent     = '$' + net.toFixed(4);
+  document.getElementById('est-cap').textContent     = '$' + cap.toFixed(2);
+  document.getElementById('est-daily').textContent   = '$' + (net * 10).toFixed(3);
+  document.getElementById('m-spacing').textContent   = '$' + space.toFixed(0);
+  document.getElementById('m-spacing-sub').textContent = `${n} levels · ${fmtUSD(size*(lastPrice||74000),2)}/order`;
+  document.getElementById('m-per-trade').textContent = '$' + net.toFixed(4);
+  document.getElementById('p-range').textContent     = '$' + Math.round((hi-lo)/1000) + 'K';
+  document.getElementById('p-levels').textContent    = n;
+  document.getElementById('feed-range').textContent  = `$${Math.round(lo/1000)}k–$${Math.round(hi/1000)}k`;
 }
 
 function updatePaperMode() {
-  const on = document.getElementById('paper-toggle').checked;
-  document.getElementById('mode-note').textContent = on
-    ? 'Simulated fills — no real orders placed.'
-    : '⚠ LIVE MODE — real orders on Coinbase.';
-  document.getElementById('mode-note').style.color = on ? '' : 'var(--red)';
+  const paper = document.getElementById('paper-toggle').checked;
+  const badge = document.getElementById('panel-badge');
+  if (paper) {
+    badge.textContent = 'PAPER'; badge.className = 'panel-badge';
+    document.getElementById('paper-pill').textContent = '📋 PAPER';
+    document.getElementById('paper-pill').style.display = '';
+    document.getElementById('dot-paper').className = 'src-dot amber';
+    document.getElementById('feed-mode-name').textContent = 'Paper';
+    document.getElementById('feed-mode-val').textContent = 'Simulated';
+    document.getElementById('feed-mode-val').className = 'src-val amber';
+  } else {
+    badge.textContent = 'LIVE 🟢'; badge.className = 'panel-badge green';
+    document.getElementById('paper-pill').style.display = 'none';
+    document.getElementById('dot-paper').className = 'src-dot green';
+    document.getElementById('feed-mode-name').textContent = 'Live';
+    document.getElementById('feed-mode-val').textContent = 'Real Orders';
+    document.getElementById('feed-mode-val').className = 'src-val green';
+  }
 }
 
 async function startGrid() {
   const settings = {
-    lower:         parseFloat(document.getElementById('s-lower').value),
-    upper:         parseFloat(document.getElementById('s-upper').value),
-    num_grids:     parseInt(document.getElementById('s-grids').value),
-    order_size:    getSize(),
+    lower:      parseFloat(document.getElementById('s-lower').value),
+    upper:      parseFloat(document.getElementById('s-upper').value),
+    num_grids:  parseInt(document.getElementById('s-grids').value),
+    order_size: getSize(),
     paper_trading: document.getElementById('paper-toggle').checked,
   };
-  await fetch('/api/start', { method: 'POST',
-    headers: {'Content-Type':'application/json'}, body: JSON.stringify(settings) });
+  await fetch('/api/start', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(settings)});
 }
 
 async function stopGrid() {
-  await fetch('/api/stop', { method: 'POST' });
+  await fetch('/api/stop', {method:'POST'});
 }
 
-function renderGrid(status) {
-  const levels = status.orders || [];
-  const price  = status.last_price || 0;
-  const el     = document.getElementById('grid-levels');
-  if (!levels.length) { el.innerHTML = '<div style="color:var(--dim);font-family:var(--mono);font-size:12px;">No grid active.</div>'; return; }
-
-  // Find nearest level to current price
-  const allLevels = levels.map(o => o.level);
-  const nearest = allLevels.reduce((a, b) => Math.abs(b - price) < Math.abs(a - price) ? b : a, allLevels[0]);
-
-  el.innerHTML = levels.map(o => {
-    const isCurrent = Math.abs(o.level - nearest) < 1;
+function renderLadder(orders, price) {
+  const el = document.getElementById('ladder-wrap');
+  if (!orders || !orders.length) { el.innerHTML = '<div style="font-family:var(--mono);font-size:12px;color:var(--muted);padding:12px;">No grid active.</div>'; return; }
+  const sorted = [...orders].sort((a,b) => b.level - a.level);
+  const nearest = sorted.reduce((a,b) => Math.abs(b.level-price) < Math.abs(a.level-price) ? b : a, sorted[0]);
+  el.innerHTML = sorted.map(o => {
     const filled = o.status === 'filled';
-    const cls = filled ? `filled-${o.side.toLowerCase()}` : (isCurrent ? 'current-price' : o.side.toLowerCase());
-    const tag = filled
-      ? `<span class="tag-filled">FILLED @ $${o.fill_price?.toLocaleString()}</span>`
-      : `<span class="tag-${o.side.toLowerCase()}">${o.side}</span>`;
-    const pnl = o.pnl != null ? `<span class="${o.pnl>=0?'pnl-pos':'pnl-neg'}">${o.pnl>=0?'+':''}$${o.pnl.toFixed(4)}</span>` : '';
-    return `<div class="grid-row ${cls}">
-      <span>$${o.level.toLocaleString()}</span>
-      ${tag}
-      <div class="fill-bar"><div class="fill-bar-inner" style="width:${filled?'100':'0'}%"></div></div>
+    const isCur  = !filled && Math.abs(o.level - nearest.level) < 1;
+    const cls    = isCur ? 'current' : (filled ? 'filled' : o.side.toLowerCase());
+    const tag    = filled ? 'FILLED' : o.side;
+    const tagCls = filled ? 'filled' : o.side.toLowerCase();
+    const pnl    = (o.pnl != null) ? `<span class="lc-pnl ${o.pnl>=0?'td-pos':'td-neg'}">${fmtSign(o.pnl)}</span>` : '';
+    return `<div class="ladder-cell ${cls}">
+      <span class="lc-price">$${o.level.toLocaleString()}</span>
+      <span class="lc-tag ${tagCls}">${tag}</span>
       ${pnl}
     </div>`;
   }).join('');
+  document.getElementById('ladder-info').textContent =
+    `${orders.filter(o=>o.status==='open'&&o.side==='BUY').length} buys · ${orders.filter(o=>o.status==='open'&&o.side==='SELL').length} sells · ${orders.filter(o=>o.status==='filled').length} filled`;
 }
 
 function renderTrades(trades) {
-  const el = document.getElementById('trade-log');
+  const el = document.getElementById('trade-tbody');
   if (!trades || !trades.length) return;
-  const recent = [...trades].reverse().slice(0, 30);
-  el.innerHTML = recent.map(t => {
-    const pnl = t.pnl != null
-      ? `<span class="${t.pnl>=0?'pnl-pos':'pnl-neg'}">${t.pnl>=0?'+':''}$${t.pnl.toFixed(4)}</span>`
-      : '<span style="color:var(--dim)">—</span>';
-    const time = t.time ? t.time.slice(11,19) : '—';
+  const recent = [...trades].reverse().slice(0,50);
+  el.innerHTML = recent.map((t,i) => {
+    const pnl = t.pnl != null ? `<span class="${t.pnl>=0?'td-pos':'td-neg'}">${fmtSign(t.pnl)}</span>` : '<span class="td-dim">—</span>';
+    const status = t.paper ? '<span class="status-pill paper">PAPER</span>' : '<span class="status-pill fill">FILLED</span>';
     return `<tr>
-      <td>${time}</td>
-      <td class="side-${t.side.toLowerCase()}">${t.side}</td>
-      <td>$${t.level?.toLocaleString()}</td>
-      <td>$${t.fill_price?.toLocaleString()}</td>
+      <td class="td-dim">${trades.length - i}</td>
+      <td class="td-dim">${(t.time||'').slice(11,19)}</td>
+      <td class="td-${t.side.toLowerCase()}">${t.side}</td>
+      <td>$${(t.level||0).toLocaleString()}</td>
+      <td>$${(t.fill_price||0).toLocaleString()}</td>
       <td>${t.size} BTC</td>
       <td>${pnl}</td>
+      <td>${status}</td>
     </tr>`;
   }).join('');
+  document.getElementById('session-count').textContent = trades.length + ' fills';
 }
 
 async function poll() {
   try {
-    const [statusRes, balRes] = await Promise.all([
-      fetch('/api/status').then(r => r.json()),
-      fetch('/api/balance').then(r => r.json()),
+    const [st, bal] = await Promise.all([
+      fetch('/api/status').then(r=>r.json()),
+      fetch('/api/balance').then(r=>r.json()),
     ]);
 
-    // Header
-    const price = statusRes.last_price;
-    if (price) document.getElementById('hdr-price').textContent = `$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
-    document.getElementById('paper-badge').style.display = statusRes.paper_trading ? '' : 'none';
-    const dot = document.getElementById('status-dot');
-    dot.className = 'status-dot' + (statusRes.running ? ' running' : '');
-    document.getElementById('status-msg').textContent = statusRes.status_msg || 'Idle';
-
-    // Stats
-    const pnl = statusRes.total_pnl || 0;
-    const pnlEl = document.getElementById('stat-pnl');
-    pnlEl.textContent = `${pnl>=0?'+':''}$${Math.abs(pnl).toFixed(4)}`;
-    pnlEl.className   = 'stat-value ' + (pnl>=0?'pos':'neg');
-    document.getElementById('stat-fills').textContent  = statusRes.total_fills || 0;
-    document.getElementById('stat-orders').textContent = (statusRes.open_buys||0) + (statusRes.open_sells||0);
-    document.getElementById('stat-orders-sub').textContent = `${statusRes.open_buys||0} buys · ${statusRes.open_sells||0} sells`;
-    const wins = statusRes.wins||0, losses = statusRes.losses||0, total = wins+losses;
-    document.getElementById('stat-winrate').textContent = total ? `${Math.round(wins/total*100)}%` : '—';
-    document.getElementById('stat-wins').textContent    = `${wins} wins / ${losses} losses`;
-
-    // Balance
-    if (!balRes.error) {
-      document.getElementById('bal-usd').textContent   = `$${(balRes.usd||0).toLocaleString(undefined,{minimumFractionDigits:2})}`;
-      document.getElementById('bal-btc').textContent   = `${(balRes.btc||0).toFixed(6)} BTC`;
-      document.getElementById('bal-total').textContent = `$${(balRes.total_usd||0).toLocaleString(undefined,{minimumFractionDigits:2})}`;
+    const price = st.last_price || 0;
+    if (price) {
+      lastPrice = price;
+      document.getElementById('t-price').textContent = `BTC ${fmtUSD(price,2)}`;
+      document.getElementById('feed-btc').textContent = fmtUSD(price,2);
+      document.getElementById('size-usd').textContent = fmtUSD(getSize()*price,0);
     }
 
-    renderGrid(statusRes);
-    renderTrades(statusRes.trades);
+    // LED
+    const led = document.getElementById('led');
+    led.className = 'led' + (st.running ? (st.paper_trading ? ' paper' : ' on') : '');
+    document.getElementById('t-status-text').textContent = st.status_msg || 'Idle';
+    document.getElementById('t-grid-info').textContent = st.running
+      ? `${st.grid_levels?.length||0} levels · ${st.open_buys||0}B ${st.open_sells||0}S` : '—';
+
+    // Paper pill
+    document.getElementById('paper-pill').style.display = st.paper_trading ? '' : 'none';
+
+    // Metrics
+    const pnl = st.total_pnl || 0;
+    const pnlEl = document.getElementById('m-pnl');
+    pnlEl.textContent = (pnl>=0?'+':'-') + '$' + Math.abs(pnl).toFixed(4);
+    pnlEl.className = 'metric-value ' + (pnl>=0?'green':'red');
+    document.getElementById('m-pnl-sub').textContent = st.paper_trading ? 'paper mode' : 'live trading';
+    document.getElementById('m-orders').textContent = (st.open_buys||0)+(st.open_sells||0);
+    document.getElementById('m-orders-sub').textContent = `${st.open_buys||0} buys · ${st.open_sells||0} sells`;
+    document.getElementById('m-fills').textContent = st.total_fills||0;
+    const w=st.wins||0, l=st.losses||0, tot=w+l;
+    document.getElementById('m-winrate').textContent = tot ? Math.round(w/tot*100)+'%' : '—';
+    document.getElementById('m-wins-sub').textContent = `${w} wins / ${l} losses`;
+    document.getElementById('p-buys').textContent  = st.open_buys||0;
+    document.getElementById('p-sells').textContent = st.open_sells||0;
+    document.getElementById('p-fills').textContent = st.total_fills||0;
+
+    // Spread feed
+    if (price) {
+      const spread = st.orders?.length > 0 ? (st.grid_spacing || 0) : 0;
+      document.getElementById('feed-spread').textContent = spread ? '$'+spread.toFixed(0) : '—';
+    }
+
+    // P&L bar (vs target = $50 daily, arbitrary)
+    const target = 50;
+    const pct = Math.min(Math.abs(pnl)/target*100, 100);
+    document.getElementById('pnl-bar-fill').style.width = pct+'%';
+    document.getElementById('pnl-bar-fill').style.background = pnl>=0 ? 'var(--green)' : 'var(--red)';
+    document.getElementById('pnl-bar-val').textContent = (pnl>=0?'+':'-')+'$'+Math.abs(pnl).toFixed(4) + ' / $'+target+' target';
+    document.getElementById('pnl-bar-pct').textContent = Math.round(pct)+'%';
+
+    // Balance
+    if (!bal.error) {
+      document.getElementById('bal-usd').textContent   = '$'+(bal.usd||0).toLocaleString(undefined,{minimumFractionDigits:2});
+      document.getElementById('bal-btc').textContent   = (bal.btc||0).toFixed(6)+' BTC';
+      document.getElementById('bal-total').textContent = '$'+(bal.total_usd||0).toLocaleString(undefined,{minimumFractionDigits:2});
+    }
+
+    renderLadder(st.orders, price);
+    renderTrades(st.trades);
+    updateEstimate();
 
   } catch(e) { console.warn('poll error', e); }
 }
 
 // Init
 updateEstimate();
-updateSizeLabel(document.getElementById('s-size').value);
+updatePaperMode();
 poll();
 setInterval(poll, 3000);
 </script>
