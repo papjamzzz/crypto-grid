@@ -527,7 +527,7 @@
       <div class="notif-row">
         <span class="notif-label">Paper Trading</span>
         <label class="toggle-switch">
-          <input type="checkbox" id="paper-toggle" checked onchange="updatePaperMode()">
+          <input type="checkbox" id="paper-toggle" onchange="updatePaperMode()">
           <span class="toggle-track"></span>
         </label>
       </div>
@@ -709,6 +709,7 @@ function updateEstimate() {
 
 function updatePaperMode() {
   const paper = document.getElementById('paper-toggle').checked;
+  localStorage.setItem('cg_paper_mode', paper);
   const badge = document.getElementById('panel-badge');
   if (paper) {
     badge.textContent = 'PAPER'; badge.className = 'panel-badge';
