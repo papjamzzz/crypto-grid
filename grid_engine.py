@@ -30,7 +30,7 @@ DEFAULT_SETTINGS = {
     "product_id":    "BTC-USD",
     "lower":         74000.0,    # bottom of grid
     "upper":         76000.0,    # top of grid
-    "num_grids":     40,         # number of grid lines → $50 spacing
+    "num_grids":     20,         # number of grid lines → $50 spacing
     "order_size":    0.00005,    # BTC per order (~$3.74 at $74k) — 11 active levels on $42
     "paper_trading": False,      # live trading by default
 }
