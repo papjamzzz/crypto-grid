@@ -1,0 +1,5 @@
+# Jinja templates: hand-written, but each one carries the whole page's
+# CSS and JS inline, so Linguist counts them by byte and labels this
+# repo HTML when the engineering is in the Python. Excluded from the
+# language stats only; they are still tracked, diffed and reviewed.
+templates/*.html linguist-detectable=false
